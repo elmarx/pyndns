@@ -1,0 +1,2 @@
+GET http://localhost:3030/update?ipaddr=10.0.0.1
+Authorization: Basic elmar secret
