@@ -1,0 +1,61 @@
+{
+  "name": "",
+  "records": [
+    {
+      "content": "ns.inwx.de hostmaster.dyn.athmer.org 2021072902 3600 900 1209600 300",
+      "name": "dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "SOA"
+    },
+    {
+      "content": "2001:16b8:2eef:ef00:ba27:ebff:fef9:5ff3",
+      "name": "al.dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "AAAA"
+    },
+    {
+      "content": "2001:16b8:2eef:ef00:dea6:32ff:fe5a:b84",
+      "name": "conduct.dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "AAAA"
+    },
+    {
+      "content": "2001:16b8:2eef:ef00:3e4a:92ff:fe77:ad36",
+      "name": "eric.dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "AAAA"
+    },
+    {
+      "content": "2001:16b8:2eef:ef00:225:4bff:febc:d2ac",
+      "name": "ike.dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "AAAA"
+    },
+    {
+      "content": "2001:16b8:2eef:ef00:dea6:32ff:feea:1a1f",
+      "name": "mackey.dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "AAAA"
+    },
+    {
+      "content": "2001:16b8:2eef:ef00:ba27:ebff:feb0:b582",
+      "name": "mooncake.dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "AAAA"
+    },
+    {
+      "content": "2001:16b8:32fb:4200:6452:bbab:9426:d47e",
+      "name": "tweek.dyn.athmer.org.",
+      "prio": 0,
+      "ttl": 600,
+      "type": "AAAA"
+    }
+  ]
+}

@@ -8,6 +8,8 @@ use warp::filters;
 use warp::filters::header::{headers_cloned, value};
 use warp::{reject, Filter, Rejection};
 
+mod zone;
+
 type WebResult<T> = std::result::Result<T, Rejection>;
 
 #[derive(Deserialize, Debug)]
