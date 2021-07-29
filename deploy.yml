@@ -1,0 +1,28 @@
+#!/usr/bin/env ansible-playbook
+- hosts: localhost
+  tasks:
+    - name: compile the binary
+      command: cargo build --release
+
+- hosts: ns.eathmer.de
+  tasks:
+    - name: upload the binary
+      copy:
+        src: ./target/release/dyndns
+        dest: /usr/local/bin
+        mode: "0755"
+      notify: restart dyndns
+
+    - name: install the systemd unit file
+      template:
+        src: ./dyndns.service.j2
+        dest: /etc/systemd/system/dyndns.service
+      notify: restart dyndns
+
+  handlers:
+    - name: restart dyndns
+      systemd:
+        state: restarted
+        enabled: yes
+        daemon_reload: yes
+        name: dyndns

@@ -3,6 +3,7 @@ use std::string::FromUtf8Error;
 use base64::{decode, encode, DecodeError};
 use http::{HeaderMap, HeaderValue};
 use serde::Deserialize;
+use std::net::SocketAddr;
 use warp::filters;
 use warp::filters::header::{headers_cloned, value};
 use warp::{reject, Filter, Rejection};
@@ -54,5 +55,7 @@ async fn main() {
             "OK"
         });
 
-    warp::serve(update).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(update)
+        .run("[::]:3030".parse::<SocketAddr>().unwrap())
+        .await;
 }
