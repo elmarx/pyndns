@@ -8,12 +8,17 @@ use warp::filters;
 use warp::filters::header::{headers_cloned, value};
 use warp::{reject, Filter, Rejection};
 
+mod hosts;
+mod zone;
+
 type WebResult<T> = std::result::Result<T, Rejection>;
 
 #[derive(Deserialize, Debug)]
 struct QueryParameters {
     ipaddr: String,
     ip6addr: Option<String>,
+    dualstack: Option<String>,
+    ip6lanprefix: Option<String>,
 }
 
 pub fn with_basic_auth(
