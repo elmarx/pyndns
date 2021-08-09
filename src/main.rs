@@ -52,13 +52,17 @@ pub fn with_basic_auth(
 
 #[tokio::main]
 async fn main() {
+    pretty_env_logger::init();
+    let log = warp::log("dyndns");
+
     let update = warp::path("update")
         .and(with_basic_auth("elmar".to_string(), "geheim".to_string()))
         .and(warp::query::<QueryParameters>())
         .map(|username, p| {
             println!("{:#?} {:#?}", username, p);
             "OK"
-        });
+        })
+        .with(log);
 
     warp::serve(update)
         .run("[::]:3030".parse::<SocketAddr>().unwrap())

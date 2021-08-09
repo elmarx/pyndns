@@ -2,6 +2,7 @@
 Description=DynDNS Update Daemon
 
 [Service]
+Environment="RUST_LOG=dyndns"
 ExecStart=/usr/local/bin/dyndns
 
 [Install]
