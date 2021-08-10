@@ -1,2 +1,2 @@
-GET http://localhost:3030/update?ipaddr=10.0.0.1
+GET http://localhost:3030/update?ipaddr=2001:16b8:2901:4b42:7642:7fff:fe8c:6ebd&ip6addr=2001:16b8:2901:4b42:7642:7fff:fe8c:6ebd&dualstack=1&ip6lanprefix=2001:16b8:328e:ab00::/64
 Authorization: Basic elmar secret
