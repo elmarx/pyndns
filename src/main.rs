@@ -3,6 +3,8 @@ use hosts::HOSTS;
 use http::HeaderValue;
 use ipnet::Ipv6Net;
 use serde::Deserialize;
+use std::fs::File;
+use std::io::Write;
 use std::net::SocketAddr;
 use std::time::SystemTime;
 use warp::filters::header::value;
@@ -87,17 +89,27 @@ fn generate_zone_file(hosts: &[Host], net: &Ipv6Net) -> String {
     zone_file
 }
 
+fn write_zone_file(file: &str, s: &str) -> std::io::Result<()> {
+    let mut file = File::create(file)?;
+    file.write_all(s.as_bytes())
+}
+
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
     let log = warp::log("dyndns");
 
+    let zone_file = std::env::var("DYN_ATHMER_ZONE_FILE").expect("please set DYN_ATHMER_ZONE_FILE");
+
     let update = warp::path("update")
         .and(with_basic_auth("elmar".to_string(), "geheim".to_string()))
         .and(warp::query::<QueryParameters>())
-        .map(|_username, p: QueryParameters| {
+        .map(move |_username, p: QueryParameters| {
             let net: Ipv6Net = p.ip6lanprefix.parse().unwrap();
-            generate_zone_file(&HOSTS, &net)
+            let zone_file_content = generate_zone_file(&HOSTS, &net);
+            write_zone_file(&*zone_file, &*zone_file_content).unwrap();
+
+            "OK"
         })
         .with(log);
 

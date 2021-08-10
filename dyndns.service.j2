@@ -3,6 +3,7 @@ Description=DynDNS Update Daemon
 
 [Service]
 Environment="RUST_LOG=dyndns"
+Environment="DYN_ATHMER_ZONE_FILE=/etc/powerdns/zones/dyn.athmer.org.zone"
 ExecStart=/usr/local/bin/dyndns
 User=dyndns
 
