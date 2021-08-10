@@ -1,20 +1,47 @@
+use crate::hosts::Host;
+use hosts::HOSTS;
 use http::HeaderValue;
+use ipnet::Ipv6Net;
 use serde::Deserialize;
 use std::net::SocketAddr;
+use std::time::SystemTime;
 use warp::filters::header::value;
 use warp::{reject, Filter, Rejection};
 
 mod hosts;
 mod zone;
 
+pub fn zone_file(serial: &str) -> String {
+    format!(
+        r#"
+$TTL 10m
+$ORIGIN dyn.athmer.org.
+
+@       IN      SOA     ns.inwx.de.        hostmaster  (
+        {} ; serial
+        1h        ; refresh
+        15m       ; retry
+        2w        ; expire
+        5m        ; negative ttl
+)
+
+@           IN    NS       ns.inwx.de.
+            IN    NS       ns2.inwx.de.
+            IN    NS       ns3.inwx.eu.
+
+"#,
+        serial
+    )
+}
+
 type WebResult<T> = std::result::Result<T, Rejection>;
 
 #[derive(Deserialize, Debug)]
-struct QueryParameters {
-    ipaddr: String,
-    ip6addr: Option<String>,
-    dualstack: Option<String>,
-    ip6lanprefix: Option<String>,
+pub struct QueryParameters {
+    pub ipaddr: String,
+    pub ip6addr: Option<String>,
+    pub dualstack: Option<String>,
+    pub ip6lanprefix: String,
 }
 
 pub fn with_basic_auth(
@@ -46,6 +73,20 @@ pub fn with_basic_auth(
     })
 }
 
+fn generate_zone_file(hosts: &[Host], net: &Ipv6Net) -> String {
+    let now = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap();
+    let mut zone_file = zone_file(now.as_secs().to_string().as_str());
+
+    for x in hosts.iter() {
+        zone_file.push_str(x.quad_a(net).as_str());
+        zone_file.push('\n');
+    }
+
+    zone_file
+}
+
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
@@ -54,9 +95,9 @@ async fn main() {
     let update = warp::path("update")
         .and(with_basic_auth("elmar".to_string(), "geheim".to_string()))
         .and(warp::query::<QueryParameters>())
-        .map(|username, p| {
-            println!("{:#?} {:#?}", username, p);
-            "OK"
+        .map(|_username, p: QueryParameters| {
+            let net: Ipv6Net = p.ip6lanprefix.parse().unwrap();
+            generate_zone_file(&HOSTS, &net)
         })
         .with(log);
 
