@@ -6,6 +6,27 @@
 
 - hosts: ns.example.com
   tasks:
+    - name: setup the host
+      tags: never
+      block:
+        - name: create group for daemon user
+          group:
+            name: dyndns
+            system: yes
+
+        - name: create a user for the daemon
+          user:
+            name: dyndns
+            group: dyndns
+            groups: pdns
+
+        - name: allow the dyndns user to reload powerdns zonse
+          copy:
+            validate: /usr/sbin/visudo -csf %s
+            dest: /etc/sudoers.d/dyndns
+            content: >
+              %dyndns ALL=(ALL) NOPASSWD: /usr/bin/pdns_control reload
+
     - name: upload the binary
       copy:
         src: ./target/release/dyndns
