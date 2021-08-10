@@ -1,11 +1,7 @@
-use std::string::FromUtf8Error;
-
-use base64::{decode, encode, DecodeError};
-use http::{HeaderMap, HeaderValue};
+use http::HeaderValue;
 use serde::Deserialize;
 use std::net::SocketAddr;
-use warp::filters;
-use warp::filters::header::{headers_cloned, value};
+use warp::filters::header::value;
 use warp::{reject, Filter, Rejection};
 
 mod hosts;
@@ -22,8 +18,8 @@ struct QueryParameters {
 }
 
 pub fn with_basic_auth(
-    user: String,
-    password: String,
+    _user: String,
+    _password: String,
 ) -> impl Filter<Extract = ((String, String),), Error = Rejection> + Clone {
     value(http::header::AUTHORIZATION.as_str()).and_then(|auth_header: HeaderValue| async move {
         match auth_header.to_str() {
