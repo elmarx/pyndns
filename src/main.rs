@@ -75,11 +75,13 @@ pub fn with_basic_auth(
     })
 }
 
-fn generate_zone_file(hosts: &[Host], net: &Ipv6Net) -> String {
+fn generate_zone_file(hosts: &[Host], net: &Ipv6Net, main_addr: &str) -> String {
     let now = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap();
     let mut zone_file = zone_file(now.as_secs().to_string().as_str());
+
+    zone_file.push_str(format!("@ IN AAAA {}\n", main_addr).as_str());
 
     for x in hosts.iter() {
         zone_file.push_str(x.quad_a(net).as_str());
@@ -106,7 +108,7 @@ async fn main() {
         .and(warp::query::<QueryParameters>())
         .map(move |_username, p: QueryParameters| {
             let net: Ipv6Net = p.ip6lanprefix.parse().unwrap();
-            let zone_file_content = generate_zone_file(&HOSTS, &net);
+            let zone_file_content = generate_zone_file(&HOSTS, &net, p.ipaddr.as_str());
             write_zone_file(&*zone_file, &*zone_file_content).unwrap();
 
             "OK"
