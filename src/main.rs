@@ -1,14 +1,18 @@
-use crate::hosts::Host;
-use hosts::HOSTS;
-use http::HeaderValue;
-use ipnet::Ipv6Net;
-use serde::Deserialize;
 use std::fs::File;
 use std::io::Write;
 use std::net::SocketAddr;
+use std::process::Command;
 use std::time::SystemTime;
+
+use http::HeaderValue;
+use ipnet::Ipv6Net;
+use serde::Deserialize;
 use warp::filters::header::value;
 use warp::{reject, Filter, Rejection};
+
+use hosts::HOSTS;
+
+use crate::hosts::Host;
 
 mod hosts;
 mod zone;
@@ -96,6 +100,16 @@ fn write_zone_file(file: &str, s: &str) -> std::io::Result<()> {
     file.write_all(s.as_bytes())
 }
 
+fn reload() -> std::io::Result<()> {
+    Command::new("sudo")
+        .arg("pdns_control")
+        .arg("reload")
+        .spawn()?
+        .wait()?;
+
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
@@ -109,7 +123,8 @@ async fn main() {
         .map(move |_username, p: QueryParameters| {
             let net: Ipv6Net = p.ip6lanprefix.parse().unwrap();
             let zone_file_content = generate_zone_file(&HOSTS, &net, p.ipaddr.as_str());
-            write_zone_file(&*zone_file, &*zone_file_content).unwrap();
+            write_zone_file(&*zone_file, &*zone_file_content).expect("writing pdns zone file");
+            reload().expect("reloading pdns zones");
 
             "OK"
         })
