@@ -34,5 +34,7 @@ lazy_static! {
         Host::new("ike", "::225:4bff:febc:d2ac".parse().unwrap()),
         Host::new("mackey", "::dea6:32ff:feea:1a1f".parse().unwrap()),
         Host::new("mooncake", "::ba27:ebff:feb0:b582".parse().unwrap()),
+        Host::new("terrance", "::96c6:91ff:fea5:2dff".parse().unwrap()),
+        Host::new("phillip", "::96c6:91ff:fea5:326d".parse().unwrap()),
     ];
 }
