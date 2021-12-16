@@ -2,7 +2,7 @@
 - hosts: localhost
   tasks:
     - name: compile the binary
-      command: cargo build --release
+      command: cross build --target x86_64-unknown-linux-gnu --release
 
 - hosts: ns.eathmer.de
   tasks:
