@@ -29,7 +29,7 @@
 
     - name: upload the binary
       copy:
-        src: ./target/release/dyndns
+        src: target/x86_64-unknown-linux-gnu/release/dyndns
         dest: /usr/local/bin
         mode: "0755"
       notify: restart dyndns
