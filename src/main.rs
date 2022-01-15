@@ -35,6 +35,7 @@ $ORIGIN dyn.example.com.
             IN    NS       ns2.example.com.
             IN    NS       ns3.example.com.
 
+terrance IN A 65.21.186.136
 "#,
     )
 }
