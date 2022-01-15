@@ -24,7 +24,7 @@ $TTL 10m
 $ORIGIN dyn.athmer.org.
 
 @       IN      SOA     ns.inwx.de.        hostmaster  (
-        {} ; serial
+        {serial} ; serial
         1h        ; refresh
         15m       ; retry
         2w        ; expire
@@ -36,7 +36,6 @@ $ORIGIN dyn.athmer.org.
             IN    NS       ns3.inwx.eu.
 
 "#,
-        serial
     )
 }
 
