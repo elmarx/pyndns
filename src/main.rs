@@ -24,7 +24,7 @@ $TTL 10m
 $ORIGIN dyn.example.com.
 
 @       IN      SOA     ns.examle.com.        hostmaster  (
-        {} ; serial
+        {serial} ; serial
         1h        ; refresh
         15m       ; retry
         2w        ; expire
@@ -36,7 +36,6 @@ $ORIGIN dyn.example.com.
             IN    NS       ns3.example.com.
 
 "#,
-        serial
     )
 }
 
