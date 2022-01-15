@@ -35,6 +35,7 @@ $ORIGIN dyn.athmer.org.
             IN    NS       ns2.inwx.de.
             IN    NS       ns3.inwx.eu.
 
+terrance IN A 65.21.186.136
 "#,
     )
 }
