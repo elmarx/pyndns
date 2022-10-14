@@ -28,10 +28,8 @@ impl Host {
 
 lazy_static! {
     pub static ref HOSTS: Vec<Host> = vec![
-        Host::new("al", "::ba27:ebff:fef9:5ff3".parse().unwrap()),
-        Host::new("conduct", "::dea6:32ff:fe5a:b84".parse().unwrap()),
+        Host::new("pikvm", "::dea6:32ff:fe5a:b84".parse().unwrap()),
         Host::new("eric", "::3e4a:92ff:fe77:ad36".parse().unwrap()),
-        Host::new("ike", "::225:4bff:febc:d2ac".parse().unwrap()),
         Host::new("mackey", "::dea6:32ff:feea:1a1f".parse().unwrap()),
         Host::new("mooncake", "::ba27:ebff:feb0:b582".parse().unwrap()),
         Host::new("terrance", "::96c6:91ff:fea5:2dff".parse().unwrap()),
