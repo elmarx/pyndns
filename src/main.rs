@@ -15,7 +15,6 @@ use hosts::HOSTS;
 use crate::hosts::Host;
 
 mod hosts;
-mod zone;
 
 pub fn zone_file(serial: &str) -> String {
     format!(
