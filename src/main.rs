@@ -1,45 +1,9 @@
-use std::fs::File;
-use std::io::Write;
-use std::net::SocketAddr;
-use std::process::Command;
-use std::time::SystemTime;
-
 use http::HeaderValue;
 use ipnet::Ipv6Net;
 use serde::Deserialize;
+use std::net::SocketAddr;
 use warp::filters::header::value;
 use warp::{reject, Filter, Rejection};
-
-use hosts::HOSTS;
-
-use crate::hosts::Host;
-
-mod hosts;
-
-pub fn zone_file(serial: &str) -> String {
-    format!(
-        r#"
-$TTL 10m
-$ORIGIN dyn.example.com.
-
-@       IN      SOA     ns.examle.com.        hostmaster  (
-        {serial} ; serial
-        1h        ; refresh
-        15m       ; retry
-        2w        ; expire
-        5m        ; negative ttl
-)
-
-@           IN    NS       ns1.example.com.
-            IN    NS       ns2.example.com.
-            IN    NS       ns3.example.com.
-
-terrance IN A 65.21.186.136
-"#,
-    )
-}
-
-type WebResult<T> = std::result::Result<T, Rejection>;
 
 #[derive(Deserialize, Debug)]
 pub struct QueryParameters {
@@ -78,53 +42,18 @@ pub fn with_basic_auth(
     })
 }
 
-fn generate_zone_file(hosts: &[Host], net: &Ipv6Net, main_addr: &str) -> String {
-    let now = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap();
-    let mut zone_file = zone_file(now.as_secs().to_string().as_str());
-
-    zone_file.push_str(format!("@ IN AAAA {}\n", main_addr).as_str());
-
-    for x in hosts.iter() {
-        zone_file.push_str(x.quad_a(net).as_str());
-        zone_file.push('\n');
-    }
-
-    zone_file
-}
-
-fn write_zone_file(file: &str, s: &str) -> std::io::Result<()> {
-    let mut file = File::create(file)?;
-    file.write_all(s.as_bytes())
-}
-
-fn reload() -> std::io::Result<()> {
-    Command::new("sudo")
-        .arg("pdns_control")
-        .arg("reload")
-        .spawn()?
-        .wait()?;
-
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
     let log = warp::log("dyndns");
-
-    let zone_file = std::env::var("DYN_EXAMPLE_ZONE_FILE").expect("please set DYN_EXAMPLE_ZONE_FILE");
 
     let update = warp::path("update")
         .and(with_basic_auth("elmar".to_string(), "geheim".to_string()))
         .and(warp::query::<QueryParameters>())
         .map(move |_username, p: QueryParameters| {
             let net: Ipv6Net = p.ip6lanprefix.parse().unwrap();
-            let zone_file_content = generate_zone_file(&HOSTS, &net, p.ipaddr.as_str());
-            write_zone_file(&*zone_file, &*zone_file_content).expect("writing pdns zone file");
-            reload().expect("reloading pdns zones");
 
+            dbg!(net);
             "OK"
         })
         .with(log);
