@@ -1,9 +1,16 @@
-use http::HeaderValue;
+use std::net::SocketAddr;
+
+use axum::extract::Query;
+use axum::routing::get;
+use axum::Router;
 use ipnet::Ipv6Net;
 use serde::Deserialize;
-use std::net::SocketAddr;
-use warp::filters::header::value;
-use warp::{reject, Filter, Rejection};
+use tower_http::auth::RequireAuthorizationLayer;
+use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use tower_http::LatencyUnit;
+use tracing::Level;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 #[derive(Deserialize, Debug)]
 pub struct QueryParameters {
@@ -13,52 +20,32 @@ pub struct QueryParameters {
     pub ip6lanprefix: String,
 }
 
-pub fn with_basic_auth(
-    _user: String,
-    _password: String,
-) -> impl Filter<Extract = ((String, String),), Error = Rejection> + Clone {
-    value(http::header::AUTHORIZATION.as_str()).and_then(|auth_header: HeaderValue| async move {
-        match auth_header.to_str() {
-            Ok(auth_header) => {
-                let username_password = auth_header.strip_prefix("Basic ");
-                match username_password {
-                    None => Err(reject()),
-                    Some(user) => match base64::decode(user) {
-                        Ok(user_password) => match String::from_utf8(user_password) {
-                            Ok(user_password) => match user_password.split_once(":") {
-                                None => Err(reject()),
-                                Some((username, password)) => {
-                                    Ok((username.to_string(), password.to_string()))
-                                }
-                            },
-                            Err(_) => Err(reject()),
-                        },
-                        Err(_) => Err(reject()),
-                    },
-                }
-            }
-            Err(_) => Err(reject()),
-        }
-    })
-}
-
 #[tokio::main]
 async fn main() {
-    pretty_env_logger::init();
-    let log = warp::log("dyndns");
+    tracing_subscriber::fmt::init();
 
-    let update = warp::path("update")
-        .and(with_basic_auth("elmar".to_string(), "geheim".to_string()))
-        .and(warp::query::<QueryParameters>())
-        .map(move |_username, p: QueryParameters| {
-            let net: Ipv6Net = p.ip6lanprefix.parse().unwrap();
+    axum::Server::bind(&"0.0.0.0:3030".parse().unwrap())
+        .serve(app().into_make_service())
+        .await
+        .unwrap();
+}
 
-            dbg!(net);
-            "OK"
-        })
-        .with(log);
+fn app() -> Router {
+    Router::new()
+        .route("/update", get(handler))
+        .layer(RequireAuthorizationLayer::basic("elmar", "secret"))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::new().include_headers(true))
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(
+                    DefaultOnResponse::new()
+                        .level(Level::INFO)
+                        .latency_unit(LatencyUnit::Micros),
+                ),
+        )
+}
 
-    warp::serve(update)
-        .run("[::]:3030".parse::<SocketAddr>().unwrap())
-        .await;
+async fn handler(Query(params): Query<QueryParameters>) -> String {
+    format!("{:?}", params)
 }
