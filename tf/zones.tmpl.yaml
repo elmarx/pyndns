@@ -1,0 +1,250 @@
+---
+zones:
+  - name: "eathmer.de"
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+        mx: 100 mx1.eathmer.de.
+        txt: v=spf1 mx -all
+      - name: mail
+        cname: butters.eathmer.de.
+      - name: mx1
+        a: 94.130.181.156
+        aaaa: 2a01:4f8:1c0c:4196::1
+      - name: ns
+        aaaa: 2a01:4f9:c010:ddb0::1
+        a: 65.21.186.136
+      - name: piwik
+        cname: web01.eathmer.de.
+      - name: matomo
+        cname: web01.eathmer.de.
+      - name: www
+        cname: web01.eathmer.de.
+      - name: butters
+        a: 94.130.181.156
+        aaaa: 2a01:4f8:1c0c:4196::1
+      - name: imap
+        cname: butters.eathmer.de.
+      - name: smtp
+        cname: butters.eathmer.de.
+      - name: web01
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+      - name: web02
+        a: 157.90.31.32
+        aaaa: 2a01:4f8:1c0c:5669::1
+      - name: magaritaville
+        a: 167.235.149.106
+        aaaa: 2a01:4f8:1c1c:3244::1
+      - name: lb
+        cname: magaritaville.eathmer.de.
+      - name: _domainkey
+        ns: butters.eathmer.de.
+
+  - name: abmeldesystem.de
+    records:
+      - name: "@"
+        a: 188.40.91.149
+        aaaa: 2a01:4f8:221:16c4::2
+        mx: 100 mx1.eathmer.de.
+        txt: v=spf1 mx -all
+      - name: www
+        cname: abmeldesystem.de.
+
+  - name: athmer.org
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+        mx: 100 mx1.eathmer.de.
+        txt: v=spf1 mx -all
+      - name: dyn
+        ns: ns.eathmer.de.
+      - name: local
+        ns: ns.eathmer.de.
+
+      - name: haus
+        cname: terrance.dyn.athmer.org.
+      - name: zigbee
+        cname: terrance.dyn.athmer.org.
+      - name: pikvm
+        cname: pikvm.dyn.athmer.org.
+
+      - name: nixrc
+        cname: web01.eathmer.de.
+      - name: talks
+        cname: web01.eathmer.de.
+      - name: files
+        cname: web01.eathmer.de.
+      - name: hochzeit
+        cname: web01.eathmer.de.
+      - name: www
+        cname: web01.eathmer.de.
+
+      - name: auth
+        cname: magaritaville.eathmer.de.
+      - name: music
+        cname: magaritaville.eathmer.de.
+
+      - name: eric
+        cname: eric.dyn.athmer.org.
+
+      - name: syncthing.eric
+        cname: eric.dyn.athmer.org.
+
+      - name: mqtt
+        cname: eric.dyn.athmer.org.
+
+      - name: grafana
+        cname: eric.dyn.athmer.org.
+      - name: photos
+        cname: eric.dyn.athmer.org.
+      - name: prometheus
+        cname: eric.dyn.athmer.org.
+
+  - name: dyn.athmer.org
+    records:
+      - name: pikvm
+        aaaa: "{{ oneandone_prefix | ansible.utils.slaac(mac.rpi4_1) }}"
+      - name: eric
+        aaaa: "{{ oneandone_prefix | ansible.utils.slaac(mac.hpe_proliant_0) }}"
+      - name: mackey
+        aaaa: "{{ oneandone_prefix | ansible.utils.slaac(mac.rpi4_0) }}"
+      - name: mooncake
+        aaaa: "{{ oneandone_prefix | ansible.utils.slaac(mac.rpi0w_0) }}"
+      - name: phillip
+        aaaa: "{{ oneandone_prefix | ansible.utils.slaac(mac.nuc_1) }}"
+      - name: terrance
+        aaaa: "{{ oneandone_prefix | ansible.utils.slaac(mac.nuc_0) }}"
+        a: 65.21.186.136 # points to ns.eathmer.de, which runs a socket-proxy
+
+  - name: local.athmer.org
+    nameservers: [ns.eathmer.de.]
+    records:
+      - name: pikvm
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.rpi4_1) }}"
+      - name: mackey
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.rpi4_0) }}"
+      - name: eric
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.hpe_proliant_0) }}"
+      - name: mooncake
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.rpi0w_0) }}"
+      - name: phillip
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.nuc_1) }}"
+      - name: pihole
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.rpi1_1) }}"
+      - name: terrance
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.nuc_0) }}"
+      - name: tweek
+        aaaa: fd00::fa43:15b3:91fe:31a6
+      - name: pc-principal
+        aaaa: "fd00::2c49:18e0:ef61:85cc" # Ethernet
+      - name: pc
+        aaaa: "fd00::869c:6090:77d9:139b" # WLAN
+      - name: ned
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.rpi1_0) }}"
+      - name: bebe1
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.cm4_1) }}"
+      - name: bebe2
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.cm4_2) }}"
+      - name: bebe6
+        aaaa: "{{ ula_prefix | ansible.utils.slaac(mac.cm4_6) }}"
+
+      - name: mqtt
+        cname: eric.local.athmer.org.
+
+  - name: stephanbbruns.de
+    records:
+      - name: "@"
+        a: 157.90.31.32
+        aaaa: 2a01:4f8:1c0c:5669::1
+      - name: www
+        a: 157.90.31.32
+        aaaa: 2a01:4f8:1c0c:5669::1
+      - name: new
+        cname: web01.eathmer.de.
+
+  - name: fischbach-westermann.de
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+        mx: 100 mx1.eathmer.de.
+        txt: v=spf1 mx -all
+      - name: _domainkey
+        ns: butters.eathmer.de.
+      - name: www
+        cname: fischbach-westermann.de.
+
+  - name: puppenboersen.de
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+      - name: _domainkey
+        ns: butters.eathmer.de.
+      - name: www
+        cname: puppenboersen.de.
+
+  - name: tiggemann-bruns.de
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+      - name: _domainkey
+        ns: butters.eathmer.de.
+      - name: www
+        cname: tiggemann-bruns.de.
+
+  - name: wernsmann-meyer.de
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+      - name: "www"
+        cname: wernsmann-meyer.de.
+
+  - name: kanzlei-meyer.de
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+        mx: 100 mx1.eathmer.de.
+      - name: www
+        cname: kanzlei-meyer.de.
+
+  - name: bruns-tiggemann.de
+    records:
+      - name: "@"
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+        mx:
+          - 10 maildomain.datevnet.de.
+          - 20 maildomain.datevnet.com.
+        txt:
+          - "MS=ms70767932"
+          - "v=spf1 a mx include:maildomain._spf.datev.de include:datevnet._spf.datev.de include:spf.protection.outlook.com ~all"
+      - name: www
+        a: 78.47.195.25
+        aaaa: 2a01:4f8:c0c:3cb8::1
+      - name: autodiscover
+        cname: autodiscover.outlook.com.
+      - name: selector1._domainkey
+        cname: selector1-brunstiggemann-de01c._domainkey.brunstiggemann.onmicrosoft.com.
+      - name: selector2._domainkey
+        cname: selector2-brunstiggemann-de01c._domainkey.brunstiggemann.onmicrosoft.com.
+
+  - name: nixus-minimax.de
+    records:
+      - name: "@"
+        mx: 100 mx1.eathmer.de.
+        txt: v=spf1 mx -all
+      - name: _domainkey
+        ns: butters.eathmer.de.
+      - name: eric
+        cname: eric.dyn.athmer.org.
+      - name: www
+        cname: nixus-minimax.de.
+
+#  - name: byos.cloud

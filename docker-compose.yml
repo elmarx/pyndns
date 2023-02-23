@@ -2,13 +2,11 @@
 version: "3"
 
 services:
-  postgres:
-    image: postgres:14
+  pdns:
+    image: powerdns/pdns-auth-47
     environment:
-      POSTGRES_DB: pdns
-      POSTGRES_USER: pdns
-      POSTGRES_PASSWORD: pdns
+      - PDNS_AUTH_API_KEY=secret
     ports:
-      - 5432:5432
-    volumes:
-      - "./samples:/docker-entrypoint-initdb.d"
+      - "1053:53"
+      - "1053:53/udp"
+      - "8081:8081"
