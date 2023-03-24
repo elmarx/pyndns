@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct Zone {
@@ -16,18 +16,16 @@ pub enum ZoneKind {
     Slave,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct RRSet {
     pub name: String,
-    #[serde(rename = "type")]
-    /// Type of this record (e.g. “A”, “PTR”, “MX”)
-    pub type_field: String,
+    pub r#type: String,
     pub ttl: u32,
     pub records: Vec<Record>,
 }
 
 /// The RREntry object represents a single record.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct Record {
     pub content: String,
     pub disabled: bool,
