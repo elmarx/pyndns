@@ -1,10 +1,11 @@
 use axum::{routing::get, Router};
-use dyndns::update::update;
-use dyndns::{BASIC_SECRET, BASIC_USERNAME};
-use tower_http::auth::RequireAuthorizationLayer;
+use tower_http::auth::AddAuthorizationLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_http::LatencyUnit;
 use tracing::Level;
+
+use dyndns::update::update;
+use dyndns::{BASIC_SECRET, BASIC_USERNAME};
 
 #[tokio::main]
 async fn main() {
@@ -12,10 +13,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/update", get(update))
-        .layer(RequireAuthorizationLayer::basic(
-            BASIC_USERNAME,
-            BASIC_SECRET,
-        ))
+        .layer(AddAuthorizationLayer::basic(BASIC_USERNAME, BASIC_SECRET))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().include_headers(true))
