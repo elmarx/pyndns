@@ -1,11 +1,12 @@
 use axum::{routing::get, Router};
+use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
 use tower_http::auth::AddAuthorizationLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_http::LatencyUnit;
 use tracing::Level;
 
 use dyndns::update::update;
-use dyndns::{BASIC_SECRET, BASIC_USERNAME};
+use dyndns::{BASIC_SECRET, BASIC_USERNAME, PORT};
 
 #[tokio::main]
 async fn main() {
@@ -25,8 +26,13 @@ async fn main() {
                 ),
         );
 
-    axum::Server::bind(&"0.0.0.0:3030".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    axum::Server::bind(&SocketAddr::V6(SocketAddrV6::new(
+        Ipv6Addr::from(0u128),
+        PORT,
+        0,
+        0,
+    )))
+    .serve(app.into_make_service())
+    .await
+    .unwrap();
 }
