@@ -1,2 +1,2 @@
-GET http://localhost:8081/api/v1/servers/localhost/zones/dyn.athmer.org.
+GET http://localhost:8081/api/v1/servers/localhost/zones/dyn.example.com.
 X-API-Key: {{ key }}

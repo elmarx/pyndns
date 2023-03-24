@@ -6,7 +6,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
 
     let resp = client
-        .get("http://localhost:8081/api/v1/servers/localhost/zones/dyn.athmer.org.")
+        .get("http://localhost:8081/api/v1/servers/localhost/zones/dyn.example.com.")
         .header("X-API-Key", "secret")
         .send()
         .await?
