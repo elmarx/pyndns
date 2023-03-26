@@ -1,7 +1,7 @@
 use crate::addresses::merge;
 use crate::model::{RRSet, Record, Zone};
-use crate::{internal_error, X_API_KEY, ZONE_ENDPOINT};
-use axum::extract::Query;
+use crate::{internal_error, PowerDnsApiConfiguration};
+use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -46,16 +46,21 @@ pub struct PatchZone {
     pub rrsets: Vec<PatchRRSet>,
 }
 
-pub async fn update(Query(params): Query<QueryParameters>) -> Result<String, (StatusCode, String)> {
+pub async fn update(
+    State(cfg): State<PowerDnsApiConfiguration>,
+    Query(params): Query<QueryParameters>,
+) -> Result<String, (StatusCode, String)> {
     let client = Client::new();
 
     let net = params.ip6lanprefix;
 
     let resp = client
-        .get(ZONE_ENDPOINT)
-        .header("X-API-Key", "secret")
+        .get(&*cfg.zone_api_endpoint)
+        .header("X-API-Key", &*cfg.api_key)
         .send()
         .await
+        .map_err(internal_error)?
+        .error_for_status()
         .map_err(internal_error)?
         .json::<Zone>()
         .await
@@ -87,9 +92,9 @@ pub async fn update(Query(params): Query<QueryParameters>) -> Result<String, (St
     };
 
     let _resp = client
-        .patch(ZONE_ENDPOINT)
+        .patch(&*cfg.zone_api_endpoint)
         .json(&payload)
-        .header("X-API-Key", X_API_KEY)
+        .header("X-API-Key", &*cfg.api_key)
         .send()
         .await
         .map_err(internal_error);

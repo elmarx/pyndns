@@ -1,20 +1,34 @@
 use axum::{routing::get, Router};
+use dyndns::update::update;
+use dyndns::PowerDnsApiConfiguration;
+use std::env::var;
 use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
 use tower_http::auth::AddAuthorizationLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_http::LatencyUnit;
 use tracing::Level;
 
-use dyndns::update::update;
-use dyndns::{BASIC_SECRET, BASIC_USERNAME, PORT};
+pub const PORT: u16 = 3030;
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
 
+    let api_endpoint = var("API_ENDPOINT").unwrap();
+    let zone = var("DYNAMIC_ZONE").unwrap();
+
+    let basic_username = var("BASIC_USERNAME").unwrap();
+    let basic_secret = var("BASIC_SECRET").unwrap();
+
+    let cfg = PowerDnsApiConfiguration {
+        api_key: var("API_KEY").unwrap(),
+        zone_api_endpoint: format!("{}/api/v1/servers/localhost/zones/{}.", api_endpoint, zone),
+    };
+
     let app = Router::new()
         .route("/update", get(update))
-        .layer(AddAuthorizationLayer::basic(BASIC_USERNAME, BASIC_SECRET))
+        .with_state(cfg)
+        .layer(AddAuthorizationLayer::basic(&basic_username, &basic_secret))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().include_headers(true))
