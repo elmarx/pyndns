@@ -15,9 +15,10 @@ pub struct QueryParameters {
 }
 
 #[derive(Serialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
 enum ChangeType {
-    REPLACE,
-    DELETE,
+    Replace,
+    _Delete,
 }
 
 #[derive(Serialize, Debug)]
@@ -35,7 +36,7 @@ impl From<&RRSet> for PatchRRSet {
             name: value.name.to_string(),
             r#type: value.r#type.to_string(),
             ttl: value.ttl,
-            changetype: ChangeType::REPLACE,
+            changetype: ChangeType::Replace,
             records: value.records.to_owned(),
         }
     }
@@ -78,7 +79,7 @@ pub async fn update(
                     })
                     .collect(),
                 r#type: rrset.r#type.clone(),
-                changetype: ChangeType::REPLACE,
+                changetype: ChangeType::Replace,
                 name: rrset.name.clone(),
                 ttl: rrset.ttl,
             }
