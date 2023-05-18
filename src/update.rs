@@ -98,7 +98,9 @@ pub async fn update(
         .header("X-API-Key", &*cfg.api_key)
         .send()
         .await
-        .map_err(internal_error);
+        .map_err(internal_error)?
+        .error_for_status()
+        .map_err(internal_error)?;
 
     Ok("OK".to_string())
 }
