@@ -67,9 +67,9 @@ pub async fn update(
         .await
         .map_err(internal_error)?;
 
-    let rrsets = resp.rrsets.iter().map(|rrset| {
-        if rrset.r#type.as_str() == "AAAA" {
-            PatchRRSet {
+    let rrsets = resp.rrsets.iter().filter_map(|rrset| {
+        if rrset.r#type == "AAAA" {
+            Some(PatchRRSet {
                 records: rrset
                     .records
                     .iter()
@@ -82,9 +82,11 @@ pub async fn update(
                 changetype: ChangeType::Replace,
                 name: rrset.name.clone(),
                 ttl: rrset.ttl,
-            }
+            })
+        } else if rrset.r#type == "SOA" {
+            None
         } else {
-            rrset.into()
+            Some(rrset.into())
         }
     });
 
