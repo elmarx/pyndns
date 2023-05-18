@@ -2,9 +2,13 @@ use crate::addresses::merge;
 use crate::model::{RRSet, Record, Zone};
 use crate::{internal_error, PowerDnsApiConfiguration};
 use axum::extract::{Query, State};
+use axum::headers::authorization::Basic;
+use axum::headers::Authorization;
 use axum::http::StatusCode;
+use axum::TypedHeader;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use tracing::info;
 
 #[derive(Deserialize, Debug)]
 pub struct QueryParameters {
@@ -50,7 +54,10 @@ pub struct PatchZone {
 pub async fn update(
     State(cfg): State<PowerDnsApiConfiguration>,
     Query(params): Query<QueryParameters>,
+    TypedHeader(authorization): TypedHeader<Authorization<Basic>>,
 ) -> Result<String, (StatusCode, String)> {
+    info!("Request from {}", authorization.username());
+
     let client = Client::new();
 
     let net = params.ip6lanprefix;
