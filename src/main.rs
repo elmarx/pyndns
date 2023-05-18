@@ -14,14 +14,14 @@ pub const PORT: u16 = 3030;
 async fn main() {
     tracing_subscriber::fmt().with_max_level(Level::INFO).init();
 
-    let api_endpoint = var("API_ENDPOINT").unwrap();
-    let zone = var("DYNAMIC_ZONE").unwrap();
+    let api_endpoint = var("API_ENDPOINT").expect("Please set API_ENDPOINT");
+    let zone = var("DYNAMIC_ZONE").expect("Please set DYNAMIC_ZONE");
 
-    let basic_username = var("BASIC_USERNAME").unwrap();
-    let basic_secret = var("BASIC_SECRET").unwrap();
+    let basic_username = var("BASIC_USERNAME").expect("Please set BASIC_USERNAME");
+    let basic_secret = var("BASIC_SECRET").expect("Please set BASIC_SECRET");
 
     let cfg = PowerDnsApiConfiguration {
-        api_key: var("API_KEY").unwrap(),
+        api_key: var("API_KEY").expect("Please set API_KEY"),
         zone_api_endpoint: format!("{}/api/v1/servers/localhost/zones/{}.", api_endpoint, zone),
     };
 
