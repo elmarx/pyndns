@@ -6,6 +6,8 @@ services:
     image: powerdns/pdns-auth-47
     environment:
       - PDNS_AUTH_API_KEY=secret
+    cap_add:
+      - net_bind_service
     ports:
       - "1053:53"
       - "1053:53/udp"
