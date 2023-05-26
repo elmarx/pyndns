@@ -14,13 +14,14 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
+        cargoToml = (builtins.fromTOML (builtins.readFile ./Cargo.toml));
+        supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+        forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
       in
-      with pkgs;
       {
-        devShells.default = mkShell {
-          buildInputs = [
+        devShells.default = pkgs.mkShell {
+          buildInputs = with pkgs; [
             pkg-config
-            openssl
 
             (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
             cargo-outdated
@@ -32,9 +33,14 @@
             ansible
           ] ++ lib.optionals (stdenv.isDarwin) [ darwin.apple_sdk.frameworks.Security ];
 
+          nativeBuildInputs = [ pkgs.openssl ];
+
+
           # required for ansible
           LC_ALL = "C.UTF-8";
         };
+
+        defaultPackage = pkgs.callPackage ./default.nix { };
       }
     );
 }
