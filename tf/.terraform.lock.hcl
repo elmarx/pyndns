@@ -1,26 +1,24 @@
-# This file is maintained automatically by "terraform init".
+# This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
-provider "registry.terraform.io/hashicorp/dns" {
-  version = "3.2.3"
+provider "registry.opentofu.org/hashicorp/dns" {
+  version     = "3.2.3"
+  constraints = "3.2.3"
   hashes = [
-    "h1:ODcR+vWOhCAJ2iCChZMVdRglNCx07VNr67OPLRPZyDY=",
-    "zh:03a304f4b76ac6c8bebffddcdf555bf77578a7f638948a681589def32e140cb8",
-    "zh:08c7d2498b747054e9c9df7838bfa4e4a6b5d63e2d29f0457247e384f792d56c",
-    "zh:20adf489819ba51ba9d9d15da2dbe1fecb92491b3d0dd80096873e5e84d8b4bd",
-    "zh:2959ff209d2578456ca490672b82864d483b9e9db9efc8e4ffada06e23017609",
-    "zh:3ecd0b22db79550fb1108ff7bd00c4066825e8c23bb64e3cc8d9b8102e8caa45",
-    "zh:6e53a9232245b4be52b56b078f15f270b89afe6abb9c9b8baab4a282fe0cf9f8",
-    "zh:78d5eefdd9e494defcb3c68d282b8f96630502cac21d1ea161f53cfe9bb483b3",
-    "zh:80437bdfa08eb90f70105b52cb06799a8f7967313654b43d28d7f654fcd4edc1",
-    "zh:816ddaca0ecc29e287376e5b0b8b0729ee13f23a9d74bfad5b14b7983e1a1775",
-    "zh:82d8ac7ad00c1a71d0a7c1aca03bb59a6b51128f895242df80b1f3d016c3c51a",
-    "zh:ec9243b8bd80693a6eeeea5d4f7f4e6f57bd44ae796d6d5b1a91790e359f8a61",
-    "zh:fd821adbfb03a2c9eac111ff27a32b3a5523b18f80333008de85482d3bbea645",
+    "h1:LwnhCnW0+bEQIxCacq24yBb3CSGkhL4j/ws2VHYa0p8=",
+    "zh:011ed9989631d24e9e273cfb0f0dffdeeb41dd9371eef48c4b5c357fd0cee42e",
+    "zh:11780befc50a4c2e34da16444fdac52d0e92a92204c773621da3cb4406312eec",
+    "zh:2445ae73a123e84d356d69da74d2e9d25cb757ede7701b29707b9a639c2e8f28",
+    "zh:4c773897183e195574457db8ea1d1763fc901131a0ac0e83f2408628b9e5c4cd",
+    "zh:58fd93661180922c99a74f0d34062a4c391b23118e095267700430be64d0c74e",
+    "zh:896a50f6cd1d03ee7160ad47ad53120081944d647c6b3fc34d134a8212f36ff5",
+    "zh:9b0a80122c308227ad3d4f5ba4c85d7c4ccfdcd3d8f9cc96868b3b31bb07fbab",
+    "zh:f61b113cf9019e1e5ab00ba09294469c1274ede3978c50c4b224fca1a31ca6c0",
+    "zh:fd3331e4062ba62798b38e691468d65766a0add390c7e89189f5a4374cc323da",
   ]
 }
 
-provider "registry.terraform.io/pan-net/powerdns" {
+provider "registry.opentofu.org/pan-net/powerdns" {
   version     = "1.5.0"
   constraints = "1.5.0"
   hashes = [

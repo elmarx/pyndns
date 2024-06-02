@@ -41,7 +41,7 @@
 
               nixfmt-rfc-style
 
-              terraform
+              opentofu
               ansible
             ]
             ++ lib.optionals (stdenv.isDarwin) [ darwin.apple_sdk.frameworks.Security ];
