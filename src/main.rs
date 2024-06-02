@@ -1,12 +1,14 @@
-use axum::{routing::get, Router};
-use dyndns::update::update;
-use dyndns::PowerDnsApiConfiguration;
 use std::env::var;
-use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
+use std::net::{Ipv6Addr, SocketAddrV6};
+
+use axum::{routing::get, Router};
 use tower_http::auth::AddAuthorizationLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_http::LatencyUnit;
 use tracing::Level;
+
+use dyndns::update::update;
+use dyndns::PowerDnsApiConfiguration;
 
 pub const PORT: u16 = 3030;
 
@@ -40,13 +42,9 @@ async fn main() {
                 ),
         );
 
-    axum::Server::bind(&SocketAddr::V6(SocketAddrV6::new(
-        Ipv6Addr::from(0u128),
-        PORT,
-        0,
-        0,
-    )))
-    .serve(app.into_make_service())
-    .await
-    .unwrap();
+    let listener =
+        tokio::net::TcpListener::bind(SocketAddrV6::new(Ipv6Addr::from(0u128), PORT, 0, 0))
+            .await
+            .unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
