@@ -7,34 +7,46 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      rust-overlay,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         overlays = [ (import rust-overlay) ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-        };
+        pkgs = import nixpkgs { inherit system overlays; };
         cargoToml = (builtins.fromTOML (builtins.readFile ./Cargo.toml));
-        supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+        supportedSystems = [
+          "x86_64-linux"
+          "aarch64-linux"
+          "aarch64-darwin"
+        ];
         forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            pkg-config
+          buildInputs =
+            with pkgs;
+            [
+              pkg-config
 
-            (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
-            cargo-outdated
-            cargo-watch
+              (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
+              cargo-outdated
+              cargo-watch
 
-            nixpkgs-fmt
+              nixfmt-rfc-style
 
-            terraform
-            ansible
-          ] ++ lib.optionals (stdenv.isDarwin) [ darwin.apple_sdk.frameworks.Security ];
+              terraform
+              ansible
+            ]
+            ++ lib.optionals (stdenv.isDarwin) [ darwin.apple_sdk.frameworks.Security ];
 
           nativeBuildInputs = [ pkgs.openssl ];
-
 
           # required for ansible
           LC_ALL = "C.UTF-8";
