@@ -1,5 +1,6 @@
-use crate::model::{RRSet, Record, Zone};
-use crate::{PowerDnsApiConfiguration, addresses};
+use crate::addresses;
+use crate::pdns::{ChangeType, PatchRRSet, PatchZone, RRSet, Record, Zone};
+use crate::config::PowerDnsApiConfiguration;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -14,47 +15,19 @@ use tracing::info;
 
 #[derive(Deserialize, Debug)]
 pub struct DynDnsQueryParameters {
+    #[allow(dead_code)]
     pub ipaddr: Option<String>,
+    #[allow(dead_code)]
     pub ip6addr: Option<String>,
+    #[allow(dead_code)]
     pub dualstack: Option<String>,
+    #[allow(dead_code)]
     pub domainname: Option<String>,
     pub ip6lanprefix: Ipv6Net,
 
+    #[allow(dead_code)]
     #[serde(flatten)]
     pub additional: BTreeMap<String, String>,
-}
-
-#[derive(Serialize, Debug)]
-#[serde(rename_all = "UPPERCASE")]
-enum ChangeType {
-    Replace,
-    _Delete,
-}
-
-#[derive(Serialize, Debug)]
-pub struct PatchRRSet {
-    name: String,
-    r#type: String,
-    ttl: u32,
-    changetype: ChangeType,
-    records: Vec<Record>,
-}
-
-impl From<&RRSet> for PatchRRSet {
-    fn from(value: &RRSet) -> Self {
-        PatchRRSet {
-            name: value.name.clone(),
-            r#type: value.r#type.clone(),
-            ttl: value.ttl,
-            changetype: ChangeType::Replace,
-            records: value.records.clone(),
-        }
-    }
-}
-
-#[derive(Serialize, Debug)]
-pub struct PatchZone {
-    pub rrsets: Vec<PatchRRSet>,
 }
 
 #[derive(thiserror::Error, Debug)]
