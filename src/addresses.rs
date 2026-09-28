@@ -30,7 +30,7 @@ pub fn merge(address: &str, prefix: &str) -> Result<Ipv6Addr, AddrMergeError> {
 
 #[cfg(test)]
 mod test {
-    use crate::addresses::{merge, AddrMergeError};
+    use crate::addresses::{AddrMergeError, merge};
 
     #[test]
     fn test_merge() {

@@ -1,14 +1,14 @@
 use std::env::var;
 use std::net::{Ipv6Addr, SocketAddrV6};
 
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
+use tower_http::LatencyUnit;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_http::validate_request::ValidateRequestHeaderLayer;
-use tower_http::LatencyUnit;
 use tracing::Level;
 
-use dyndns::update::update;
 use dyndns::PowerDnsApiConfiguration;
+use dyndns::update::update;
 
 pub const PORT: u16 = 3030;
 

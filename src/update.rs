@@ -1,12 +1,12 @@
+use crate::PowerDnsApiConfiguration;
 use crate::addresses::merge;
 use crate::model::{RRSet, Record, Zone};
-use crate::PowerDnsApiConfiguration;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum_extra::headers::authorization::Basic;
-use axum_extra::headers::Authorization;
 use axum_extra::TypedHeader;
+use axum_extra::headers::Authorization;
+use axum_extra::headers::authorization::Basic;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tracing::info;
