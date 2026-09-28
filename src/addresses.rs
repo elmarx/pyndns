@@ -37,6 +37,6 @@ mod test {
             "2001:16b8:328e:ab00:96c6:91ff:fea5:2dff"
                 .parse()
                 .map_err(AddrMergeError::from)
-        )
+        );
     }
 }

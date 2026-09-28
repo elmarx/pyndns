@@ -24,7 +24,7 @@ pub struct RRSet {
     pub records: Vec<Record>,
 }
 
-/// The RREntry object represents a single record.
+/// The `RREntry` object represents a single record.
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct Record {
     pub content: String,

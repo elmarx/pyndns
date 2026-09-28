@@ -24,7 +24,7 @@ async fn main() {
 
     let cfg = PowerDnsApiConfiguration {
         api_key: var("API_KEY").expect("Please set API_KEY"),
-        zone_api_endpoint: format!("{}/api/v1/servers/localhost/zones/{}.", api_endpoint, zone),
+        zone_api_endpoint: format!("{api_endpoint}/api/v1/servers/localhost/zones/{zone}."),
     };
 
     let app = Router::new()

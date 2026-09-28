@@ -13,6 +13,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .json::<Zone>()
         .await?;
 
-    println!("{:#?}", resp);
+    println!("{resp:#?}");
     Ok(())
 }

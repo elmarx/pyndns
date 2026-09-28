@@ -37,11 +37,11 @@ pub struct PatchRRSet {
 impl From<&RRSet> for PatchRRSet {
     fn from(value: &RRSet) -> Self {
         PatchRRSet {
-            name: value.name.to_string(),
-            r#type: value.r#type.to_string(),
+            name: value.name.clone(),
+            r#type: value.r#type.clone(),
             ttl: value.ttl,
             changetype: ChangeType::Replace,
-            records: value.records.to_owned(),
+            records: value.records.clone(),
         }
     }
 }
