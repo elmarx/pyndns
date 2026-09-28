@@ -1,5 +1,6 @@
 mod addresses;
 mod pdns;
+mod secrets_from_env;
 mod server;
 
 #[tokio::main]

@@ -1,9 +1,11 @@
 use crate::pdns::Client;
+use crate::secrets_from_env;
 use crate::server::state::AppState;
 use crate::server::update::update;
 use axum::Router;
 use axum::routing::get;
 use std::env::var;
+use std::io;
 use std::net::{Ipv6Addr, SocketAddrV6};
 use tower_http::LatencyUnit;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
@@ -12,15 +14,20 @@ use tracing::Level;
 
 pub const PORT: u16 = 3030;
 
-pub async fn run() -> std::io::Result<()> {
+pub async fn run() -> io::Result<()> {
     let pdns_server_url =
         var("PDNS_SERVER_URL").expect("PDNS_SERVER_URL should be set to the API-URL of PowerDNS");
     let zone = var("DYNAMIC_ZONE").expect("Please set DYNAMIC_ZONE");
 
     let basic_username = var("BASIC_USERNAME").expect("Please set BASIC_USERNAME");
-    let basic_secret = var("BASIC_SECRET").expect("Please set BASIC_SECRET");
+    let basic_secret = secrets_from_env::secret_from_env("BASIC_SECRET")
+        .expect("Failed to read BASIC_SECRET or BASIC_SECRET_FILE");
 
-    let client = Client::new(pdns_server_url, var("API_KEY").expect("Please set API_KEY"));
+    let client = Client::new(
+        pdns_server_url,
+        secrets_from_env::secret_from_env("API_KEY")
+            .expect("Failed to read API_KEY or API_KEY_FILE"),
+    );
 
     // ValidateRequestHeaderLayer::basic is deprecated, but I plan to replace it anyway
     #[allow(deprecated)]
@@ -43,8 +50,7 @@ pub async fn run() -> std::io::Result<()> {
         );
 
     let listener =
-        tokio::net::TcpListener::bind(SocketAddrV6::new(Ipv6Addr::from(0u128), PORT, 0, 0))
-            .await
-            .unwrap();
-    axum::serve(listener, app).await
+        tokio::net::TcpListener::bind(SocketAddrV6::new(Ipv6Addr::from(0u128), PORT, 0, 0)).await?;
+    axum::serve(listener, app).await?;
+    Ok(())
 }
