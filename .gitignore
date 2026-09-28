@@ -2,6 +2,7 @@
 .direnv
 
 terraform.tfstate*
+tf/.terraform
 
 /target
 result

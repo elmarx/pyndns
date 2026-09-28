@@ -18,12 +18,14 @@ mod test {
 
     #[test]
     fn test_merge() {
-        let sample_address = "2001:9e8:3771:d800:96c6:91ff:fea5:2dff".parse().unwrap();
-        let sample_prefix = "2001:16b8:328e:ab00::/64".parse().unwrap();
+        // an existing AAAA record, e.g. from the dyn.example.com fixture zone
+        let sample_address = "2001:db8:1::96c6:91ff:fea5:2dff".parse().unwrap();
+        // the new prefix reported by a client performing a dyndns update
+        let sample_prefix = "2001:db8:2::/64".parse().unwrap();
 
         assert_eq!(
             merge(sample_address, sample_prefix),
-            "2001:16b8:328e:ab00:96c6:91ff:fea5:2dff"
+            "2001:db8:2::96c6:91ff:fea5:2dff"
                 .parse::<Ipv6Addr>()
                 .unwrap()
         );

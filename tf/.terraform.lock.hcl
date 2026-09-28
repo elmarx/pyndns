@@ -1,28 +1,23 @@
 # This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
-provider "registry.opentofu.org/hashicorp/dns" {
-  version     = "3.2.3"
-  constraints = "3.2.3"
-  hashes = [
-    "h1:LwnhCnW0+bEQIxCacq24yBb3CSGkhL4j/ws2VHYa0p8=",
-    "zh:011ed9989631d24e9e273cfb0f0dffdeeb41dd9371eef48c4b5c357fd0cee42e",
-    "zh:11780befc50a4c2e34da16444fdac52d0e92a92204c773621da3cb4406312eec",
-    "zh:2445ae73a123e84d356d69da74d2e9d25cb757ede7701b29707b9a639c2e8f28",
-    "zh:4c773897183e195574457db8ea1d1763fc901131a0ac0e83f2408628b9e5c4cd",
-    "zh:58fd93661180922c99a74f0d34062a4c391b23118e095267700430be64d0c74e",
-    "zh:896a50f6cd1d03ee7160ad47ad53120081944d647c6b3fc34d134a8212f36ff5",
-    "zh:9b0a80122c308227ad3d4f5ba4c85d7c4ccfdcd3d8f9cc96868b3b31bb07fbab",
-    "zh:f61b113cf9019e1e5ab00ba09294469c1274ede3978c50c4b224fca1a31ca6c0",
-    "zh:fd3331e4062ba62798b38e691468d65766a0add390c7e89189f5a4374cc323da",
-  ]
-}
-
 provider "registry.opentofu.org/pan-net/powerdns" {
   version     = "1.5.0"
   constraints = "1.5.0"
   hashes = [
+    "h1:5PzcoEtTNx8rkrgl+WAKP6kAPk7M11gdK397nHIlFVg=",
+    "h1:7kz5zgR3ecuDbU3i+j15B6qzoABhGm+JU3tvlqjhf5s=",
+    "h1:81rMSTXMLe0WK3q1iXv2fOXifIQrM7CLD4b5jREuCZI=",
+    "h1:Bg7PI8JY9s6fGudFoPw9UjRVVECBmvUUWS4853l0R5A=",
+    "h1:CoAOHoUt9oN6F00y5RQ3PlLAJ8C7xYgMQo7fno+ns/A=",
+    "h1:Nn61FL6WdidqUEc4OFemK40Ff48+7TGhU6N7zH3bov8=",
+    "h1:Sy7XuCJh4qKGwLYYtOPw3NuIw/qWkSdc87SCJ0QmzVc=",
     "h1:bsz18KLloevlTZkXwZr8u0sFCZKcOYyts2RaWkV6YNc=",
+    "h1:i3N96lgrL7cxJAuzWWrTfT6mS2sOxwi5aANJU7+p0+8=",
+    "h1:oMzrqQGFY88Cwx06YkFHP6io3jow/22FRZkeK0UZtGY=",
+    "h1:rOXguHd1Bnkrp+Tp7kUCv3CLmE7Jnkq/7JCkyuCcFgk=",
+    "h1:tTmFZZSqViNBhjk8tznYSfbWpYc/5HNbr+6REsZL+cc=",
+    "h1:xZz19PcYCyqLTEcvIgAuIqybd656tMOJrF1u6DrOuOg=",
     "zh:02d1a87c28635779f66d1dcf165b5f16530f809deb6c71c35c3e58d715a88bf4",
     "zh:1285a419c7fd2947f891771bd77d2f6e7dd0cb00621c547b6993947085616009",
     "zh:340faecd0a0036e721480564acbad2ba0da6a9c0c0cd633957dcde76a4ba3798",

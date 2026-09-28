@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    powerdns = {
+      source  = "pan-net/powerdns"
+      version = "1.5.0"
+    }
+  }
+}
+
 provider "powerdns" {
   api_key    = "secret"
   server_url = "http://localhost:8081"
