@@ -1,57 +1,68 @@
 {
-  description = "A devShell example";
+  description = "PynDNS, a Dynamic DNS updater for PowerDNS";
 
   inputs = {
+    flake-parts.url = "github:hercules-ci/flake-parts";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
-    {
+    inputs@{
       self,
+      flake-parts,
       nixpkgs,
       rust-overlay,
-      flake-utils,
       ...
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        overlays = [ (import rust-overlay) ];
-        pkgs = import nixpkgs { inherit system overlays; };
-        cargoToml = (builtins.fromTOML (builtins.readFile ./Cargo.toml));
-        supportedSystems = [
-          "x86_64-linux"
-          "aarch64-linux"
-          "aarch64-darwin"
-        ];
-        forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
-      in
-      {
-        devShells.default = pkgs.mkShell {
-          buildInputs =
-            with pkgs;
-            [
-              pkg-config
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
-              (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
-              cargo-outdated
-              cargo-watch
+      perSystem =
+        { system, pkgs, ... }:
+        let
+          rustPkgs = import nixpkgs {
+            inherit system;
+            overlays = [ (import rust-overlay) ];
+          };
+        in
+        {
+          devShells.default = pkgs.mkShell {
+            buildInputs =
+              with rustPkgs;
+              [
+                pkg-config
 
-              nixfmt-rfc-style
+                (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
+                cargo-outdated
+                cargo-watch
 
-              opentofu
-            ]
-            ++ lib.optionals (stdenv.isDarwin) [ darwin.apple_sdk.frameworks.Security ];
+                nixfmt-rfc-style
 
-          nativeBuildInputs = [ pkgs.openssl ];
+                opentofu
+              ]
+              ++ lib.optionals (stdenv.isDarwin) [ darwin.apple_sdk.frameworks.Security ];
 
-          # required for ansible
-          LC_ALL = "C.UTF-8";
+            nativeBuildInputs = [ pkgs.openssl ];
+
+            # required for ansible
+            LC_ALL = "C.UTF-8";
+          };
+
+          packages.default = pkgs.callPackage ./default.nix { };
         };
 
-        defaultPackage = pkgs.callPackage ./default.nix { };
-      }
-    );
+      flake = {
+        overlays.default = final: prev: { pyndns = self.packages.${final.system}.default; };
+
+        nixosModules.default = {
+          imports = [ ./nixos-module.nix ];
+          nixpkgs.overlays = [ self.overlays.default ];
+        };
+      };
+    };
 }
