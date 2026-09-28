@@ -1,8 +1,9 @@
 use crate::addresses::merge;
 use crate::model::{RRSet, Record, Zone};
-use crate::{internal_error, PowerDnsApiConfiguration};
+use crate::PowerDnsApiConfiguration;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
 use axum_extra::headers::authorization::Basic;
 use axum_extra::headers::Authorization;
 use axum_extra::TypedHeader;
@@ -51,11 +52,33 @@ pub struct PatchZone {
     pub rrsets: Vec<PatchRRSet>,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("Failed to send request to powerdns: {0}")]
+    RequestError(#[from] reqwest::Error),
+
+    #[error("Failed to merge IPv6 address and prefix: {0}")]
+    AddrMergeError(#[from] crate::addresses::AddrMergeError),
+}
+
+impl IntoResponse for Error {
+    fn into_response(self) -> Response {
+        (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
+    }
+}
+
+///
+///
+/// # Errors
+///
+/// returns an error if
+/// - the request to the PowerDNS-API fails
+/// - the IPv6 address and prefix are invalid
 pub async fn update(
     State(cfg): State<PowerDnsApiConfiguration>,
     Query(params): Query<QueryParameters>,
     TypedHeader(authorization): TypedHeader<Authorization<Basic>>,
-) -> Result<String, (StatusCode, String)> {
+) -> Result<String, Error> {
     info!("Request from {}", authorization.username());
 
     let client = Client::new();
@@ -66,13 +89,10 @@ pub async fn update(
         .get(&*cfg.zone_api_endpoint)
         .header("X-API-Key", &*cfg.api_key)
         .send()
-        .await
-        .map_err(internal_error)?
-        .error_for_status()
-        .map_err(internal_error)?
+        .await?
+        .error_for_status()?
         .json::<Zone>()
-        .await
-        .map_err(internal_error)?;
+        .await?;
 
     let rrsets = resp.rrsets.iter().filter_map(|rrset| {
         if rrset.r#type == "AAAA" {
@@ -106,10 +126,8 @@ pub async fn update(
         .json(&payload)
         .header("X-API-Key", &*cfg.api_key)
         .send()
-        .await
-        .map_err(internal_error)?
-        .error_for_status()
-        .map_err(internal_error)?;
+        .await?
+        .error_for_status()?;
 
     Ok("OK".to_string())
 }

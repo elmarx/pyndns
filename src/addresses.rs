@@ -11,6 +11,11 @@ pub enum AddrMergeError {
     NetmaskParseError(#[from] ipnet::AddrParseError),
 }
 
+///
+///
+/// # Errors
+///
+/// if `address` or `prefix` is not a valid IPv6 address or prefix, an error is returned.
 pub fn merge(address: &str, prefix: &str) -> Result<Ipv6Addr, AddrMergeError> {
     let address: Ipv6Addr = address.parse()?;
     let prefix: Ipv6Net = prefix.parse()?;
