@@ -7,8 +7,8 @@ use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, Tr
 use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::Level;
 
-use dyndns::PowerDnsApiConfiguration;
-use dyndns::update::update;
+use pyndns::PowerDnsApiConfiguration;
+use pyndns::update::update;
 
 pub const PORT: u16 = 3030;
 
