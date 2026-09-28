@@ -2,8 +2,8 @@ use std::env::var;
 use std::net::{Ipv6Addr, SocketAddrV6};
 
 use axum::{routing::get, Router};
-use tower_http::auth::AddAuthorizationLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tower_http::LatencyUnit;
 use tracing::Level;
 
@@ -30,7 +30,10 @@ async fn main() {
     let app = Router::new()
         .route("/update", get(update))
         .with_state(cfg)
-        .layer(AddAuthorizationLayer::basic(&basic_username, &basic_secret))
+        .layer(ValidateRequestHeaderLayer::basic(
+            &basic_username,
+            &basic_secret,
+        ))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().include_headers(true))
