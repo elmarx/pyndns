@@ -1,6 +1,4 @@
 locals {
-  nameservers = ["ns1.example.com.", "ns2.example.com."]
-
   records = {
     host1 = "2001:db8:1::1"
     host2 = "2001:db8:1::2"
@@ -11,7 +9,6 @@ locals {
 resource "powerdns_zone" "this" {
   name        = "dyn.example.com."
   kind        = "Master"
-  nameservers = local.nameservers
 }
 
 resource "powerdns_record" "this" {
