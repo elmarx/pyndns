@@ -8,7 +8,7 @@ edition = "2024"
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0.229", features = ["derive"] }
-ipnet = "2.12.2"
+ipnet = { version = "2.12.2", features = ["serde"] }
 axum = { version = "0.8.9" }
 tower-http = { version = "0.7.1", features = ["auth", "trace"] }
 tracing = "0.1.44"

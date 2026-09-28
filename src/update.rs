@@ -1,12 +1,12 @@
-use crate::PowerDnsApiConfiguration;
-use crate::addresses::merge;
 use crate::model::{RRSet, Record, Zone};
+use crate::{PowerDnsApiConfiguration, addresses};
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum_extra::TypedHeader;
 use axum_extra::headers::Authorization;
 use axum_extra::headers::authorization::Basic;
+use ipnet::Ipv6Net;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -16,7 +16,7 @@ pub struct QueryParameters {
     pub ipaddr: Option<String>,
     pub ip6addr: Option<String>,
     pub dualstack: Option<String>,
-    pub ip6lanprefix: String,
+    pub ip6lanprefix: Ipv6Net,
 }
 
 #[derive(Serialize, Debug)]
@@ -56,9 +56,6 @@ pub struct PatchZone {
 pub enum Error {
     #[error("Failed to send request to powerdns: {0}")]
     RequestError(#[from] reqwest::Error),
-
-    #[error("Failed to merge IPv6 address and prefix: {0}")]
-    AddrMergeError(#[from] crate::addresses::AddrMergeError),
 }
 
 impl IntoResponse for Error {
@@ -74,6 +71,10 @@ impl IntoResponse for Error {
 /// returns an error if
 /// - the request to the PowerDNS-API fails
 /// - the IPv6 address and prefix are invalid
+///
+/// # Panics
+///
+/// If powerdns returns a non-parseable IPv6 address in the AAAA record.
 pub async fn update(
     State(cfg): State<PowerDnsApiConfiguration>,
     Query(params): Query<QueryParameters>,
@@ -81,9 +82,9 @@ pub async fn update(
 ) -> Result<String, Error> {
     info!("Request from {}", authorization.username());
 
-    let client = Client::new();
+    tracing::debug!("Received query parameters: {:?}", params);
 
-    let net = params.ip6lanprefix;
+    let client = Client::new();
 
     let resp = client
         .get(&*cfg.zone_api_endpoint)
@@ -100,9 +101,16 @@ pub async fn update(
                 records: rrset
                     .records
                     .iter()
-                    .map(|r| Record {
-                        disabled: r.disabled,
-                        content: merge(r.content.as_str(), net.as_str()).unwrap().to_string(),
+                    .map(|r| {
+                        let address = r
+                            .content
+                            .parse()
+                            .expect("powerdns to only return IPv6 addresses in AAAA records");
+
+                        Record {
+                            disabled: r.disabled,
+                            content: addresses::merge(address, params.ip6lanprefix).to_string(),
+                        }
                     })
                     .collect(),
                 r#type: rrset.r#type.clone(),
