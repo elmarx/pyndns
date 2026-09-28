@@ -1,15 +1,12 @@
 use crate::addresses;
-use crate::pdns::{ChangeType, PatchRRSet, PatchZone, RRSet, Record, Zone};
-use crate::config::PowerDnsApiConfiguration;
+use crate::pdns::{ApiClient, ChangeType, Error, PatchRRSet, PatchZone, Record};
+use crate::server::state::AppState;
 use axum::extract::{Query, State};
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
 use axum_extra::TypedHeader;
 use axum_extra::headers::Authorization;
 use axum_extra::headers::authorization::Basic;
 use ipnet::Ipv6Net;
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::BTreeMap;
 use tracing::info;
 
@@ -30,18 +27,6 @@ pub struct DynDnsQueryParameters {
     pub additional: BTreeMap<String, String>,
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("Failed to send request to powerdns: {0}")]
-    RequestError(#[from] reqwest::Error),
-}
-
-impl IntoResponse for Error {
-    fn into_response(self) -> Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
-    }
-}
-
 ///
 ///
 /// # Errors
@@ -53,8 +38,8 @@ impl IntoResponse for Error {
 /// # Panics
 ///
 /// If powerdns returns a non-parseable IPv6 address in the AAAA record.
-pub async fn update(
-    State(cfg): State<PowerDnsApiConfiguration>,
+pub async fn update<C: ApiClient>(
+    State(AppState { client, zone }): State<AppState<C>>,
     Query(dyndns_params): Query<DynDnsQueryParameters>,
     TypedHeader(authorization): TypedHeader<Authorization<Basic>>,
 ) -> Result<String, Error> {
@@ -62,16 +47,7 @@ pub async fn update(
 
     tracing::debug!("Received dyndns query parameters: {:?}", dyndns_params);
 
-    let client = Client::new();
-
-    let resp = client
-        .get(&*cfg.zone_api_endpoint)
-        .header("X-API-Key", &*cfg.api_key)
-        .send()
-        .await?
-        .error_for_status()?
-        .json::<Zone>()
-        .await?;
+    let resp = client.get_zone(&zone).await?;
 
     let rrsets = resp.rrsets.iter().filter_map(|rrset| {
         if rrset.r#type == "AAAA" {
@@ -108,13 +84,98 @@ pub async fn update(
         rrsets: rrsets.collect(),
     };
 
-    let _resp = client
-        .patch(&*cfg.zone_api_endpoint)
-        .json(&payload)
-        .header("X-API-Key", &*cfg.api_key)
-        .send()
-        .await?
-        .error_for_status()?;
+    client.patch_zone(&zone, &payload).await?;
 
     Ok("OK".to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::pdns::{RRSet, Zone, ZoneKind};
+    use std::sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    };
+
+    #[derive(Clone)]
+    struct MockClient {
+        zone: Zone,
+        patched: Arc<AtomicBool>,
+    }
+
+    impl ApiClient for MockClient {
+        #[allow(clippy::unused_async_trait_impl)]
+        async fn get_zone(&self, zone: &str) -> Result<Zone, Error> {
+            assert_eq!(zone, "example");
+            Ok(self.zone.clone())
+        }
+
+        #[allow(clippy::unused_async_trait_impl)]
+        async fn patch_zone(&self, zone: &str, payload: &PatchZone) -> Result<(), Error> {
+            assert_eq!(zone, "example");
+            assert_eq!(payload.rrsets.len(), 2);
+            let aaaa = &payload.rrsets[0];
+            assert_eq!(aaaa.name, "host.example.");
+            assert_eq!(aaaa.r#type, "AAAA");
+            assert_eq!(aaaa.records[0].content, "2001:db8:2::1");
+            assert!(matches!(aaaa.changetype, ChangeType::Replace));
+            let a = &payload.rrsets[1];
+            assert_eq!(a.r#type, "A");
+            assert_eq!(a.records[0].content, "192.0.2.1");
+            self.patched.store(true, Ordering::SeqCst);
+            Ok(())
+        }
+    }
+
+    #[tokio::test]
+    async fn update_uses_client_to_patch_zone() {
+        let record = |content: &str| Record {
+            content: content.to_string(),
+            disabled: false,
+        };
+        let rrset = |kind: &str, content: &str| RRSet {
+            name: "host.example.".to_string(),
+            r#type: kind.to_string(),
+            ttl: 300,
+            records: vec![record(content)],
+        };
+        let patched = Arc::new(AtomicBool::new(false));
+        let client = MockClient {
+            zone: Zone {
+                id: "example.".to_string(),
+                name: "example.".to_string(),
+                url: "/api/v1/servers/localhost/zones/example.".to_string(),
+                kind: ZoneKind::Native,
+                rrsets: vec![
+                    rrset("AAAA", "2001:db8:1::1"),
+                    rrset("SOA", "ignored"),
+                    rrset("A", "192.0.2.1"),
+                ],
+            },
+            patched: patched.clone(),
+        };
+        let params = DynDnsQueryParameters {
+            ipaddr: None,
+            ip6addr: None,
+            dualstack: None,
+            domainname: None,
+            ip6lanprefix: "2001:db8:2::/64".parse().unwrap(),
+            additional: BTreeMap::new(),
+        };
+
+        let result = update(
+            State(AppState {
+                client,
+                zone: "example".to_string(),
+            }),
+            Query(params),
+            TypedHeader(Authorization::basic("user", "password")),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(result, "OK");
+        assert!(patched.load(Ordering::SeqCst));
+    }
 }

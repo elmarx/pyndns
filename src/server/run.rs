@@ -1,4 +1,5 @@
-use crate::config::{PORT, PowerDnsApiConfiguration};
+use crate::pdns::Client;
+use crate::server::state::AppState;
 use crate::server::update::update;
 use axum::Router;
 use axum::routing::get;
@@ -9,23 +10,23 @@ use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, Tr
 use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::Level;
 
+pub const PORT: u16 = 3030;
+
 pub async fn run() -> std::io::Result<()> {
-    let api_endpoint = var("API_ENDPOINT").expect("Please set API_ENDPOINT");
+    let pdns_server_url =
+        var("PDNS_SERVER_URL").expect("PDNS_SERVER_URL should be set to the API-URL of PowerDNS");
     let zone = var("DYNAMIC_ZONE").expect("Please set DYNAMIC_ZONE");
 
     let basic_username = var("BASIC_USERNAME").expect("Please set BASIC_USERNAME");
     let basic_secret = var("BASIC_SECRET").expect("Please set BASIC_SECRET");
 
-    let cfg = PowerDnsApiConfiguration {
-        api_key: var("API_KEY").expect("Please set API_KEY"),
-        zone_api_endpoint: format!("{api_endpoint}/api/v1/servers/localhost/zones/{zone}."),
-    };
+    let client = Client::new(pdns_server_url, var("API_KEY").expect("Please set API_KEY"));
 
     // ValidateRequestHeaderLayer::basic is deprecated, but I plan to replace it anyway
     #[allow(deprecated)]
     let app = Router::new()
-        .route("/update", get(update))
-        .with_state(cfg)
+        .route("/update", get(update::<Client>))
+        .with_state(AppState::new(client, zone))
         .layer(ValidateRequestHeaderLayer::basic(
             &basic_username,
             &basic_secret,
