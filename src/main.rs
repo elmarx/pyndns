@@ -27,6 +27,8 @@ async fn main() {
         zone_api_endpoint: format!("{api_endpoint}/api/v1/servers/localhost/zones/{zone}."),
     };
 
+    // ValidateRequestHeaderLayer::basic is deprecated, but I plan to replace it anyway
+    #[allow(deprecated)]
     let app = Router::new()
         .route("/update", get(update))
         .with_state(cfg)
