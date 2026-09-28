@@ -32,22 +32,20 @@
         in
         {
           devShells.default = pkgs.mkShell {
-            buildInputs =
-              with rustPkgs;
-              [
-                (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
+            buildInputs = with rustPkgs; [
+              (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
 
-                nixfmt
+              nixfmt
 
-                opentofu
-              ];
+              opentofu
+            ];
           };
 
           packages.default = pkgs.callPackage ./default.nix { };
         };
 
       flake = {
-        overlays.default = final: prev: { pyndns = self.packages.${final.system}.default; };
+        overlays.default = final: _prev: { pyndns = self.packages.${final.system}.default; };
 
         nixosModules.default = {
           imports = [ ./nixos-module.nix ];
