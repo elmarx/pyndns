@@ -8,6 +8,6 @@ terraform {
 }
 
 provider "powerdns" {
-  api_key    = "secret"
+  api_key    = "secret-api-key"
   server_url = "http://localhost:8081"
 }

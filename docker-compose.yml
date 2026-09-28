@@ -3,7 +3,7 @@ services:
   pdns:
     image: powerdns/pdns-auth-52
     environment:
-      - PDNS_AUTH_API_KEY=secret
+      - PDNS_AUTH_API_KEY=secret-api-key
     cap_add:
       - net_bind_service
     ports:
