@@ -9,14 +9,19 @@ use axum_extra::headers::authorization::Basic;
 use ipnet::Ipv6Net;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use tracing::info;
 
 #[derive(Deserialize, Debug)]
-pub struct QueryParameters {
+pub struct DynDnsQueryParameters {
     pub ipaddr: Option<String>,
     pub ip6addr: Option<String>,
     pub dualstack: Option<String>,
+    pub domainname: Option<String>,
     pub ip6lanprefix: Ipv6Net,
+
+    #[serde(flatten)]
+    pub additional: BTreeMap<String, String>,
 }
 
 #[derive(Serialize, Debug)]
@@ -77,12 +82,12 @@ impl IntoResponse for Error {
 /// If powerdns returns a non-parseable IPv6 address in the AAAA record.
 pub async fn update(
     State(cfg): State<PowerDnsApiConfiguration>,
-    Query(params): Query<QueryParameters>,
+    Query(dyndns_params): Query<DynDnsQueryParameters>,
     TypedHeader(authorization): TypedHeader<Authorization<Basic>>,
 ) -> Result<String, Error> {
     info!("Request from {}", authorization.username());
 
-    tracing::debug!("Received query parameters: {:?}", params);
+    tracing::debug!("Received dyndns query parameters: {:?}", dyndns_params);
 
     let client = Client::new();
 
@@ -109,7 +114,8 @@ pub async fn update(
 
                         Record {
                             disabled: r.disabled,
-                            content: addresses::merge(address, params.ip6lanprefix).to_string(),
+                            content: addresses::merge(address, dyndns_params.ip6lanprefix)
+                                .to_string(),
                         }
                     })
                     .collect(),
