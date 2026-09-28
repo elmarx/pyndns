@@ -14,7 +14,9 @@ pub const PORT: u16 = 3030;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt().with_max_level(Level::INFO).init();
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
 
     let api_endpoint = var("API_ENDPOINT").expect("Please set API_ENDPOINT");
     let zone = var("DYNAMIC_ZONE").expect("Please set DYNAMIC_ZONE");
