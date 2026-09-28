@@ -35,22 +35,12 @@
             buildInputs =
               with rustPkgs;
               [
-                pkg-config
-
                 (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
-                cargo-outdated
-                cargo-watch
 
-                nixfmt-rfc-style
+                nixfmt
 
                 opentofu
-              ]
-              ++ lib.optionals (stdenv.isDarwin) [ darwin.apple_sdk.frameworks.Security ];
-
-            nativeBuildInputs = [ pkgs.openssl ];
-
-            # required for ansible
-            LC_ALL = "C.UTF-8";
+              ];
           };
 
           packages.default = pkgs.callPackage ./default.nix { };
